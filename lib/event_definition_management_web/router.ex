@@ -1,6 +1,10 @@
 defmodule EventDefinitionManagementWeb.Router do
   use EventDefinitionManagementWeb, :router
 
+  use AshAuthentication.Phoenix.Router
+
+  import AshAuthentication.Plug.Helpers
+
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
@@ -8,16 +12,72 @@ defmodule EventDefinitionManagementWeb.Router do
     plug :put_root_layout, html: {EventDefinitionManagementWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug :load_from_session
   end
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug :load_from_bearer
+    plug :set_actor, :user
+  end
+
+  scope "/", EventDefinitionManagementWeb do
+    pipe_through :browser
+
+    ash_authentication_live_session :authenticated_routes do
+      # in each liveview, add one of the following at the top of the module:
+      #
+      # If an authenticated user must be present:
+      # on_mount {EventDefinitionManagementWeb.LiveUserAuth, :live_user_required}
+      #
+      # If an authenticated user *may* be present:
+      # on_mount {EventDefinitionManagementWeb.LiveUserAuth, :live_user_optional}
+      #
+      # If an authenticated user must *not* be present:
+      # on_mount {EventDefinitionManagementWeb.LiveUserAuth, :live_no_user}
+    end
   end
 
   scope "/", EventDefinitionManagementWeb do
     pipe_through :browser
 
     get "/", PageController, :home
+    auth_routes AuthController, EventDefinitionManagement.Accounts.User, path: "/auth"
+    sign_out_route AuthController
+
+    # Remove these if you'd like to use your own authentication views
+    sign_in_route register_path: "/register",
+                  reset_path: "/reset",
+                  auth_routes_prefix: "/auth",
+                  on_mount: [{EventDefinitionManagementWeb.LiveUserAuth, :live_no_user}],
+                  overrides: [
+                    EventDefinitionManagementWeb.AuthOverrides,
+                    Elixir.AshAuthentication.Phoenix.Overrides.DaisyUI
+                  ]
+
+    # Remove this if you do not want to use the reset password feature
+    reset_route auth_routes_prefix: "/auth",
+                overrides: [
+                  EventDefinitionManagementWeb.AuthOverrides,
+                  Elixir.AshAuthentication.Phoenix.Overrides.DaisyUI
+                ]
+
+    # Remove this if you do not use the confirmation strategy
+    confirm_route EventDefinitionManagement.Accounts.User, :confirm_new_user,
+      auth_routes_prefix: "/auth",
+      overrides: [
+        EventDefinitionManagementWeb.AuthOverrides,
+        Elixir.AshAuthentication.Phoenix.Overrides.DaisyUI
+      ]
+
+    # Remove this if you do not use the magic link strategy.
+    magic_sign_in_route(EventDefinitionManagement.Accounts.User, :magic_link,
+      auth_routes_prefix: "/auth",
+      overrides: [
+        EventDefinitionManagementWeb.AuthOverrides,
+        Elixir.AshAuthentication.Phoenix.Overrides.DaisyUI
+      ]
+    )
   end
 
   # Other scopes may use custom stacks.
@@ -39,6 +99,16 @@ defmodule EventDefinitionManagementWeb.Router do
 
       live_dashboard "/dashboard", metrics: EventDefinitionManagementWeb.Telemetry
       forward "/mailbox", Plug.Swoosh.MailboxPreview
+    end
+  end
+
+  if Application.compile_env(:event_definition_management, :dev_routes) do
+    import AshAdmin.Router
+
+    scope "/admin" do
+      pipe_through :browser
+
+      ash_admin "/"
     end
   end
 end

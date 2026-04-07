@@ -2,7 +2,9 @@ defmodule EventDefinitionManagementWeb.ErrorJSONTest do
   use EventDefinitionManagementWeb.ConnCase, async: true
 
   test "renders 404" do
-    assert EventDefinitionManagementWeb.ErrorJSON.render("404.json", %{}) == %{errors: %{detail: "Not Found"}}
+    assert EventDefinitionManagementWeb.ErrorJSON.render("404.json", %{}) == %{
+             errors: %{detail: "Not Found"}
+           }
   end
 
   test "renders 500" do

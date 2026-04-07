@@ -1,4 +1,7 @@
 import Config
+config :event_definition_management, token_signing_secret: "MbOVVZPW7w/SiHAqJa2DIFcS6slpmglu"
+config :bcrypt_elixir, log_rounds: 1
+config :ash, policies: [show_policy_breakdowns?: true], disable_async?: true
 
 # Configure your database
 #

@@ -10,12 +10,14 @@ defmodule EventDefinitionManagement.Application do
     children = [
       EventDefinitionManagementWeb.Telemetry,
       EventDefinitionManagement.Repo,
-      {DNSCluster, query: Application.get_env(:event_definition_management, :dns_cluster_query) || :ignore},
+      {DNSCluster,
+       query: Application.get_env(:event_definition_management, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: EventDefinitionManagement.PubSub},
       # Start a worker by calling: EventDefinitionManagement.Worker.start_link(arg)
       # {EventDefinitionManagement.Worker, arg},
       # Start to serve requests, typically the last entry
-      EventDefinitionManagementWeb.Endpoint
+      EventDefinitionManagementWeb.Endpoint,
+      {AshAuthentication.Supervisor, [otp_app: :event_definition_management]}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

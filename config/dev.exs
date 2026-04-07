@@ -1,4 +1,5 @@
 import Config
+config :ash, policies: [show_policy_breakdowns?: true]
 
 # Configure your database
 config :event_definition_management, EventDefinitionManagement.Repo,
@@ -69,7 +70,9 @@ config :event_definition_management, EventDefinitionManagementWeb.Endpoint,
   ]
 
 # Enable dev routes for dashboard and mailbox
-config :event_definition_management, dev_routes: true
+config :event_definition_management,
+  dev_routes: true,
+  token_signing_secret: "ARkQoBh5SKkRiE60gqXdtRtJUZvREZPO"
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :default_formatter, format: "[$level] $message\n"
