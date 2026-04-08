@@ -1,39 +1,31 @@
 defmodule EventDefinitionManagementWeb.LiveUserAuth do
-  @moduledoc """
-  Helpers for authenticating users in LiveViews.
-  """
-
-  import Phoenix.Component
-  use EventDefinitionManagementWeb, :verified_routes
-
-  # This is used for nested liveviews to fetch the current user.
-  # To use, place the following at the top of that liveview:
-  # on_mount {EventDefinitionManagementWeb.LiveUserAuth, :current_user}
-  def on_mount(:current_user, _params, session, socket) do
-    {:cont, AshAuthentication.Phoenix.LiveSession.assign_new_resources(socket, session)}
-  end
-
-  def on_mount(:live_user_optional, _params, _session, socket) do
-    if socket.assigns[:current_user] do
-      {:cont, socket}
-    else
-      {:cont, assign(socket, :current_user, nil)}
-    end
-  end
+  import Phoenix.LiveView
 
   def on_mount(:live_user_required, _params, _session, socket) do
     if socket.assigns[:current_user] do
       {:cont, socket}
     else
-      {:halt, Phoenix.LiveView.redirect(socket, to: ~p"/sign-in")}
+      {:halt, redirect(socket, to: "/sign-in")}
     end
   end
 
-  def on_mount(:live_no_user, _params, _session, socket) do
+  def on_mount(:live_user_home, _params, _session, socket) do
     if socket.assigns[:current_user] do
-      {:halt, Phoenix.LiveView.redirect(socket, to: ~p"/")}
+      path =
+        case socket.assigns.current_user.role do
+          :super_admin -> "/admin"
+          :client_admin -> "/client"
+          :operator -> "/operator"
+          _ -> "/"
+        end
+
+      {:halt, redirect(socket, to: path)}
     else
-      {:cont, assign(socket, :current_user, nil)}
+      {:cont, socket}
     end
+  end
+
+  def on_mount(:default, _params, _session, socket) do
+    {:cont, socket}
   end
 end

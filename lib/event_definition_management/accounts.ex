@@ -6,7 +6,8 @@ defmodule EventDefinitionManagement.Accounts do
   end
 
   resources do
-    resource EventDefinitionManagement.Accounts.Token
     resource EventDefinitionManagement.Accounts.User
+    resource EventDefinitionManagement.Accounts.Organization # <-- DOIT ÊTRE ICI
+    resource EventDefinitionManagement.Accounts.Token
   end
 end

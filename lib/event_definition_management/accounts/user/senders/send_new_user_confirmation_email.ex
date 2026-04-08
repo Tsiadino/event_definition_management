@@ -22,7 +22,7 @@ defmodule EventDefinitionManagement.Accounts.User.Senders.SendNewUserConfirmatio
   end
 
   defp body(params) do
-    url = url(~p"/confirm_new_user/#{params[:token]}")
+    url = url(~p"/confirm-new-user/#{params[:token]}")
 
     """
     <p>Click this link to confirm your email:</p>

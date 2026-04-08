@@ -55,7 +55,10 @@ config :spark,
 config :event_definition_management,
   ecto_repos: [EventDefinitionManagement.Repo],
   generators: [timestamp_type: :utc_datetime],
-  ash_domains: [Events, EventDefinitionManagement.Accounts]
+  ash_domains: [
+    EventDefinitionManagement.Accounts,
+    EventDefinitionManagement.Events # <-- Remplace "Events" par le nom complet
+  ]
 
 # Configure the endpoint
 config :event_definition_management, EventDefinitionManagementWeb.Endpoint,
@@ -113,3 +116,6 @@ config :phoenix, :json_library, Jason
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"
+
+config :ash_authentication_phoenix, :ash_authentication_ui,
+  out_of_the_box_ui?: true
